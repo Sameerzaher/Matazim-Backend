@@ -1,3 +1,6 @@
+
+
+
 """
 Django settings for matazim project.
 
@@ -55,7 +58,8 @@ MIDDLEWARE = [
 ]
 
 CORS_ORIGIN_WHITELIST = [
-    "http://localhost:3000", 'https://matazim-project.web.app'
+    #"https://matazim-project.web.app/"
+     "http://localhost:3000"
 ]
 
 ROOT_URLCONF = 'matazim.urls'
