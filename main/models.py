@@ -9,6 +9,7 @@ class Lesson(models.Model):
     numOfLesson = models.IntegerField()
     name = models.CharField(max_length=32)
     link = models.CharField(max_length=100)
+    assignment = models.CharField(max_length=300)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='lessons') 
     class meta:
         unique_together = (('numOfLesson', 'course'),) 
