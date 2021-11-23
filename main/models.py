@@ -22,3 +22,12 @@ class UserCourses(models.Model):
     class meta:
         unique_together = (('numOfLesson', 'course', 'user'),) 
         index_together = (('numOfLesson', 'course', 'user'),) 
+
+class UserLessons(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
+    answer = models.CharField(max_length=300)
+    notes =  models.CharField(max_length=400)
+    class meta:
+        unique_together = (( 'lesson', 'user'),) 
+        index_together = (( 'lesson', 'user'),)         
