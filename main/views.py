@@ -33,19 +33,40 @@ class UserLessonsViewSet(viewsets.ModelViewSet):
     serializer_class = UserLessonsSerializer     
     authentication_classes = (TokenAuthentication, )
      
-    #  Get all the userLessons details belonged to the requsted user by the authentication
-    @action (detail=True, methods = ['GET'])
+    # #  Get all the userLessons details belonged to the requsted user by the authentication
+    # @action (detail=True, methods = ['GET'])
+    # def getUserLessons(self, request, pk=None):
+    #     # get the user by the authentication
+    #     user = request.user
+    #     arr=[]
+    #     userlessons= UserLessons.objects.filter(user=user.id)
+    #     for userlesson in userlessons:
+    #          serializers = UserLessonsSerializer(userlesson, many=False)
+    #          arr.append(serializers.data)
+            
+    #     response = {'message': 'Get', 'results': arr }
+    #     return Response (response, status=status.HTTP_200_OK)
+
+ #  Get all the userLessons details belonged to the requsted user by the authentication
+    @action (detail=True, methods = ['POST'])
     def getUserLessons(self, request, pk=None):
         # get the user by the authentication
         user = request.user
+        # lessonID = '4'
+        if 'lesson' in request.data:
+            lessonID = request.data['lesson']
+        # else:
+            # lessonID=4
         arr=[]
-        userlessons= UserLessons.objects.filter(user=user.id)
+        userlessons= UserLessons.objects.filter(user=user.id, lesson=lessonID)
         for userlesson in userlessons:
              serializers = UserLessonsSerializer(userlesson, many=False)
              arr.append(serializers.data)
             
         response = {'message': 'Get', 'results': arr }
         return Response (response, status=status.HTTP_200_OK)
+
+
 
     #  Update or create a userLessons 
     @action (detail=True, methods = ['POST'])
