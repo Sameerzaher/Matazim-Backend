@@ -27,6 +27,64 @@ class LessonViewSet(viewsets.ModelViewSet):
 class UserCoursesViewSet(viewsets.ModelViewSet):
     queryset = UserCourses.objects.all()
     serializer_class = UserCoursesSerializer 
+    authentication_classes = (TokenAuthentication, )
+
+    @action (detail=True, methods = ['POST'])
+    def getUserCourses(self, request, pk=None):
+        # get the user by the authentication
+        user = request.user
+        arr=[]
+        userCourses= UserCourses.objects.filter(user=user.id, course=pk)
+        for userCourse in userCourses:
+            serializers = UserCoursesSerializer(userCourse, many=False)
+            arr.append(serializers.data)
+            
+        response = {'message': 'Get', 'results': arr }
+        return Response (response, status=status.HTTP_200_OK)
+
+    #  Update or create a userLessons 
+    @action (detail=True, methods = ['POST'])
+    def addUserCourses(self, request, pk=None):
+        # get the user by the authentication
+        user = request.user
+        # if addUserCourses get a value (len(getUserLessons) > 0) it means that 
+        # this object exist in DB and the user is trying to update that object.
+        getUserCourses= UserCourses.objects.filter(user=user.id, course=pk)       
+                
+        try:
+            # success if need to update 
+            course = UserCourses.objects.get(id=getUserCourses[0].id)
+            # print("printing: ",lesson.notes, lesson.answer)
+            course.user = user
+            # user trying to change the lesson
+            if 'lesson' in request.data:
+                lesson = request.data['lesson']
+                course.numOfLesson = lesson
+           
+            
+            course.save()
+            print ("user is: ", user)
+            serializers = UserCoursesSerializer(course, many=False)
+            response = {'message': 'Updated', 'results': serializers.data }
+            return Response (response, status=status.HTTP_200_OK)
+        except:
+            # need to create
+            print("trying to create")
+            print("pk ", pk)
+            # user began a new course
+            if 'lesson' in request.data:
+                lesson = request.data['lesson']
+           
+               
+            course = Course.objects.get(id=pk)
+            courseVar = UserCourses.objects.create(user=user, course=course, numOfLesson=int(lesson))
+            courseVar.save()
+            print("course is: ", course)
+            print(lesson)
+            print(type(lesson))
+            response = {'message': 'created', 'results': courseVar }
+            return Response (response, status=status.HTTP_200_OK)
+
 
 class UserLessonsViewSet(viewsets.ModelViewSet):
     queryset = UserLessons.objects.all()
