@@ -16,6 +16,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @action (detail=True, methods = ['POST'])
     def getuser(self, request, pk=None):
         user = User.object.get(id=pk)
+    
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer 
