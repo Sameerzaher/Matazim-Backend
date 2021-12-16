@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 class Course(models.Model):
     name = models.CharField(max_length=32)
@@ -30,4 +31,11 @@ class UserLessons(models.Model):
     notes =  models.CharField(max_length=400)
     class meta:
         unique_together = (( 'lesson', 'user'),) 
-        index_together = (( 'lesson', 'user'),)         
+        index_together = (( 'lesson', 'user'),) 
+
+class UserClasses(models.Model):
+    
+    ClassName = models.CharField(max_length=32)
+    NumberOfStudents = models.IntegerField(validators=[MinValueValidator(1),MaxValueValidator(30)])
+    
+           
