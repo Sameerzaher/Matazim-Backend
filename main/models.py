@@ -2,6 +2,17 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
 
+class UserProfile(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    username =  models.CharField(max_length=32)
+    email = models.CharField(max_length=32)
+    firstName = models.CharField(max_length=32)
+    lastName = models.CharField(max_length=32)
+    aboutMe = models.CharField(max_length=200)
+    hobbies = models.CharField(max_length=200)
+
+
+
 class Course(models.Model):
     name = models.CharField(max_length=32)
     description = models.CharField(max_length=360)

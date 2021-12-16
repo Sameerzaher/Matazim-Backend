@@ -1,12 +1,12 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
-from .models import Course, Lesson, UserCourses, UserLessons, UserClasses
+from .models import Course, Lesson, UserCourses, UserLessons, UserClasses ,UserProfile
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'password')
+        fields = ('id', 'username', 'password', 'email','firstName', 'lastName')
         extra_kwargs = {'password': {'write_only': True, 'required': True}}
 
     def create(self, validated_data):
@@ -39,4 +39,11 @@ class UserLessonsSerializer(serializers.ModelSerializer):
 class UserClassesSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserClasses
-        fields = ('id', 'classname', 'numberofstudents')                            
+        fields = ('id', 'classname', 'numberofstudents')  
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ('id', 'user','username', 'email', 'firstName', 'lastName', 'aboutMe', 'hobbies')
+
+                            
