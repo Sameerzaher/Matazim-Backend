@@ -3,9 +3,9 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.authentication import TokenAuthentication 
 from django.contrib.auth.models import User 
-from .serializers import UserSerializer, CourseSerializer, LessonSerializer, UserCoursesSerializer, UserLessonsSerializer
+from .serializers import UserSerializer, CourseSerializer, LessonSerializer, UserCoursesSerializer, UserLessonsSerializer, UserProfileSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from .models import Course, Lesson, UserCourses, UserLessons
+from .models import Course, Lesson, UserCourses, UserLessons, UserProfile
 from rest_framework import status
 from rest_framework.response import Response
 
@@ -17,6 +17,52 @@ class UserViewSet(viewsets.ModelViewSet):
     def getuser(self, request, pk=None):
         user = User.object.get(id=pk)
     
+    # @action (detail=True, methods = ['POST'])
+    # def getUserDetails(self, request, pk=None):
+    #         print("im here in get user details")
+    #         user = request.user
+    #         print("user from query is: ", user)
+    #         arr=[]
+    #         u = User.objects.get(username='yarinAAA')
+    #         print("user mail is: ", u.email)
+    #         print("user name is: ", u.name)
+    #         print("user surname is: ", u.lastName)
+    #         userDetails= User.objects.filter(user=user.id, course=pk)
+    #         for userCourse in userCourses:
+    #             serializers = UserCoursesSerializer(userCourse, many=False)
+    #             arr.append(serializers.data)
+                
+    #         response = {'message': 'Get', 'results': arr }
+    #         return Response (response, status=status.HTTP_200_OK)
+
+
+class UserProfileViewSet(viewsets.ModelViewSet):
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileSerializer 
+    authentication_classes = (TokenAuthentication, )
+
+    @action (detail=True, methods = ['POST'])
+    def getUserDetails(self, request, pk=None):
+            print("im here")
+            user = request.user
+            print("user from query is: ", user)
+            # print("user mail is: ", user.email)
+            # print("user name is: ", user.firstName)
+            # print("user surname is: ", user.lastName)
+            arr=[]
+            u = UserProfile.objects.get(user=user)
+            print("user mail is: ", u.email)
+            print("user name is: ", u.firstName)
+            print("user surname is: ", u.lastName)
+            # userDetails= User.objects.filter(user=user.id, course=pk)
+            # for userCourse in userCourses:
+            u.username=user
+            serializers = UserProfileSerializer(u, many=False)
+            #     arr.append(serializers.data)
+                
+            response = {'message': 'Get', 'results': serializers.data }
+            return Response (response, status=status.HTTP_200_OK)
+
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer 
@@ -85,7 +131,6 @@ class UserCoursesViewSet(viewsets.ModelViewSet):
             print(type(lesson))
             response = {'message': 'created', 'results': courseVar }
             return Response (response, status=status.HTTP_200_OK)
-
 
 class UserLessonsViewSet(viewsets.ModelViewSet):
     queryset = UserLessons.objects.all()
@@ -173,3 +218,29 @@ class UserLessonsViewSet(viewsets.ModelViewSet):
             lessonVar.save()
             response = {'message': 'created', 'results': lessonVar }
             return Response (response, status=status.HTTP_200_OK)
+
+
+    # class UserProfileViewSet(viewsets.ModelViewSet):
+    #     queryset = UserProfile.objects.all()
+    #     serializer_class = UserProfileSerializer 
+        # authentication_classes = (TokenAuthentication, )
+
+    # @action (detail=True, methods = ['POST'])
+    # def getUserDetails(self, request, pk=None):
+    #         print("im here in get user details")
+    #         user = request.user
+    #         print("user from query is: ", user)
+    #         arr=[]
+    #         u = User.objects.get(username='yarinAAA')
+    #         print("user mail is: ", u.email)
+    #         print("user name is: ", u.name)
+    #         print("user surname is: ", u.lastName)
+    #         userDetails= User.objects.filter(user=user.id, course=pk)
+    #         for userCourse in userCourses:
+    #             serializers = UserCoursesSerializer(userCourse, many=False)
+    #             arr.append(serializers.data)
+                
+    #         response = {'message': 'Get', 'results': arr }
+    #         return Response (response, status=status.HTTP_200_OK)
+
+    
