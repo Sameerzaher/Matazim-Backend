@@ -62,7 +62,20 @@ class UserProfileViewSet(viewsets.ModelViewSet):
                 
             response = {'message': 'Get', 'results': serializers.data }
             return Response (response, status=status.HTTP_200_OK)
-
+    def UpdateUserDetails(self, request, pk=None):
+            print("im here")
+            user = request.user
+            print("user from query is: ",user)
+            arr=[]
+            u = UserProfile.objects.get(user=user)
+            print("user mail is: ", u.email)
+            print("user name is: ", u.firstName)
+            print("user surname is: ", u.lastName)
+            u.username=user
+            serializers = UserProfileSerializer(u, many=False)
+            response = {'message': 'Get', 'results': serializers.data}
+            return Response (response, status=status.HTTP_200_OK)
+            
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer 
