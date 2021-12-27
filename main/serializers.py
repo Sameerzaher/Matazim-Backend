@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
-from .models import Course, Lesson, UserCourses, UserLessons, UserClasses ,UserProfile
+from .models import Course, Lesson, UserCourses, UserLessons, UserClasses ,UserProfile, Class
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -28,6 +28,7 @@ class CourseSerializer(serializers.ModelSerializer):
 
 
 class UserCoursesSerializer(serializers.ModelSerializer):
+    # course = CourseSerializer(many=False)
     class Meta:
         model = UserCourses
         fields = ('id', 'user', 'numOfLesson', 'course')
@@ -41,9 +42,20 @@ class UserClassesSerializer(serializers.ModelSerializer):
         model = UserClasses
         fields = ('id', 'classname', 'numberofstudents')  
 
+class ClassSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Class
+        fields = ('id', 'className')  
+
 class UserProfileSerializer(serializers.ModelSerializer):
+    studentClasses = ClassSerializer(many=True)
+    teacherClasses = ClassSerializer(many=True)
+    coordinatorClasses = ClassSerializer(many=True)
+    
     class Meta:
         model = UserProfile
-        fields = ('id', 'user','username', 'email', 'firstName', 'lastName', 'aboutMe', 'hobbies')
+        fields = ('id', 'user','username', 'email', 'firstName', 'lastName', 'aboutMe', 'hobbies', 'badges', 'myGoal',
+         'studentClasses','teacherClasses', 'coordinatorClasses' )
+    
 
                             

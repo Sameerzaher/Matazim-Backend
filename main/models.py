@@ -10,12 +10,19 @@ class UserProfile(models.Model):
     lastName = models.CharField(max_length=32)
     aboutMe = models.CharField(max_length=200)
     hobbies = models.CharField(max_length=200)
+    badges = models.IntegerField(validators=[MinValueValidator(0),MaxValueValidator(6)])
+    myGoal = models.CharField(max_length=200)
+    # classes = models.ManyToManyField(Class)
 
-
+    def __str__(self):
+        return self.user.username
 
 class Course(models.Model):
     name = models.CharField(max_length=32)
     description = models.CharField(max_length=360)
+
+    def __str__(self):
+        return self.name
 
 class Lesson(models.Model):
     numOfLesson = models.IntegerField()
@@ -45,8 +52,12 @@ class UserLessons(models.Model):
         index_together = (( 'lesson', 'user'),) 
 
 class UserClasses(models.Model):
-    
     ClassName = models.CharField(max_length=32)
     NumberOfStudents = models.IntegerField(validators=[MinValueValidator(1),MaxValueValidator(30)])
     
+class Class(models.Model):
+    className = models.CharField(max_length=32)
+    students = models.ManyToManyField(UserProfile, related_name='studentClasses')
+    teachers = models.ManyToManyField(UserProfile, related_name='teacherClasses')
+    coordinators = models.ManyToManyField(UserProfile, related_name='coordinatorClasses')
            
