@@ -3,9 +3,9 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.authentication import TokenAuthentication 
 from django.contrib.auth.models import User 
-from .serializers import UserSerializer, CourseSerializer, LessonSerializer, UserCoursesSerializer, UserLessonsSerializer, UserProfileSerializer
+from .serializers import UserSerializer, CourseSerializer, LessonSerializer, UserCoursesSerializer, UserLessonsSerializer, UserProfileSerializer, ClassSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from .models import Course, Lesson, UserCourses, UserLessons, UserProfile
+from .models import Course, Lesson, UserCourses, UserLessons, UserProfile, Class
 from rest_framework import status
 from rest_framework.response import Response
 
@@ -62,7 +62,20 @@ class UserProfileViewSet(viewsets.ModelViewSet):
                 
             response = {'message': 'Get', 'results': serializers.data }
             return Response (response, status=status.HTTP_200_OK)
-
+    def UpdateUserDetails(self, request, pk=None):
+            print("im here")
+            user = request.user
+            print("user from query is: ",user)
+            arr=[]
+            u = UserProfile.objects.get(user=user)
+            print("user mail is: ", u.email)
+            print("user name is: ", u.firstName)
+            print("user surname is: ", u.lastName)
+            u.username=user
+            serializers = UserProfileSerializer(u, many=False)
+            response = {'message': 'Get', 'results': serializers.data}
+            return Response (response, status=status.HTTP_200_OK)
+            
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer 
@@ -75,6 +88,20 @@ class UserCoursesViewSet(viewsets.ModelViewSet):
     queryset = UserCourses.objects.all()
     serializer_class = UserCoursesSerializer 
     authentication_classes = (TokenAuthentication, )
+
+# get all the courses belongs to the user
+    @action (detail=True, methods = ['GET'])
+    def getAllUserCourses(self, request, pk=None):
+        # get the user by the authentication
+        user = request.user
+        arr=[]
+        userCourses= UserCourses.objects.filter(user=user.id)
+        for userCourse in userCourses:
+            serializers = UserCoursesSerializer(userCourse, many=False)
+            arr.append(serializers.data)
+            
+        response = {'message': 'Get', 'results': arr }
+        return Response (response, status=status.HTTP_200_OK)
 
     @action (detail=True, methods = ['POST'])
     def getUserCourses(self, request, pk=None):
@@ -218,6 +245,25 @@ class UserLessonsViewSet(viewsets.ModelViewSet):
             lessonVar.save()
             response = {'message': 'created', 'results': lessonVar }
             return Response (response, status=status.HTTP_200_OK)
+
+class ClassViewSet(viewsets.ModelViewSet):
+    queryset = Class.objects.all()
+    serializer_class = ClassSerializer 
+
+
+    @action (detail=True, methods = ['POST'])
+    def getClassStudents(self, request, pk=None):
+     
+        arr=[]
+        userProfile= UserProfile.objects.filter(studentClasses=pk)
+        for userProfile in userProfile:
+             serializers = UserProfileSerializer(userProfile, many=False)
+             arr.append(serializers.data)
+            
+        response = {'message': 'Get', 'results': arr }
+        return Response (response, status=status.HTTP_200_OK)
+
+
 
 
     # class UserProfileViewSet(viewsets.ModelViewSet):
