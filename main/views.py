@@ -42,13 +42,23 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication, )
 
     @action (detail=True, methods = ['POST'])
+    def getUserByUsername(self, request, pk=None):
+            username = request.data['username']
+            arr=[]
+            u = UserProfile.objects.get(username=username)
+            # u.username=user
+            serializers = UserProfileSerializer(u, many=False)
+            #     arr.append(serializers.data)
+                
+            response = {'message': 'Get', 'results': serializers.data }
+            print("response:", response)
+            return Response (response, status=status.HTTP_200_OK)
+
+    @action (detail=True, methods = ['POST'])
     def getUserDetails(self, request, pk=None):
             print("im here")
             user = request.user
             print("user from query is: ", user)
-            # print("user mail is: ", user.email)
-            # print("user name is: ", user.firstName)
-            # print("user surname is: ", user.lastName)
             arr=[]
             u = UserProfile.objects.get(user=user)
             print("user mail is: ", u.email)
@@ -250,7 +260,7 @@ class ClassViewSet(viewsets.ModelViewSet):
     queryset = Class.objects.all()
     serializer_class = ClassSerializer 
 
-
+    # get all the students of a class
     @action (detail=True, methods = ['POST'])
     def getClassStudents(self, request, pk=None):
      
@@ -263,8 +273,71 @@ class ClassViewSet(viewsets.ModelViewSet):
         response = {'message': 'Get', 'results': arr }
         return Response (response, status=status.HTTP_200_OK)
 
+    # get all the teachers of a class
+    @action (detail=True, methods = ['POST'])
+    def getClassTeachers(self, request, pk=None):
+     
+        arr=[]
+        userProfile= UserProfile.objects.filter(teacherClasses=pk)
+        for userProfile in userProfile:
+             serializers = UserProfileSerializer(userProfile, many=False)
+             arr.append(serializers.data)
+            
+        response = {'message': 'Get', 'results': arr }
+        return Response (response, status=status.HTTP_200_OK)
 
+     # get all the coordinators of a class
+    @action (detail=True, methods = ['POST'])
+    def getClassCoordinators(self, request, pk=None):
+     
+        arr=[]
+        userProfile= UserProfile.objects.filter(coordinatorClasses=pk)
+        for userProfile in userProfile:
+             serializers = UserProfileSerializer(userProfile, many=False)
+             arr.append(serializers.data)
+            
+        response = {'message': 'Get', 'results': arr }
+        return Response (response, status=status.HTTP_200_OK)
 
+    #  Add a user to class 
+    @action (detail=True, methods = ['POST'])
+    def addUserToClass(self, request, pk=None):
+        # get the class by pk
+        getUserClass= Class.objects.get(id=pk)  
+
+        # trying to add a student
+        if 'student' in request.data:   
+            # get the username by the data
+            username = request.data['student']
+            # get the user by the given username
+            user = UserProfile.objects.get(username=username)
+            getUserClass.students.add(user)
+
+        # trying to add a teacher
+        if 'teacher' in request.data:   
+            # get the username by the data
+            username = request.data['teacher']
+            # get the user by the given username
+            user = UserProfile.objects.get(username=username)
+            getUserClass.teachers.add(user)
+
+         # trying to add a coordinator
+        if 'coordinator' in request.data:   
+            # get the username by the data
+            username = request.data['coordinator']
+            # get the user by the given username
+            user = UserProfile.objects.get(username=username)
+            getUserClass.coordinators.add(user)
+
+        getUserClass.save()
+        serializers = ClassSerializer(getUserClass, many=False)
+        response = {'message': 'Updated', 'results': serializers.data }
+        return Response (response, status=status.HTTP_200_OK)
+
+    
+       
+               
+       
 
     # class UserProfileViewSet(viewsets.ModelViewSet):
     #     queryset = UserProfile.objects.all()
@@ -289,4 +362,4 @@ class ClassViewSet(viewsets.ModelViewSet):
     #         response = {'message': 'Get', 'results': arr }
     #         return Response (response, status=status.HTTP_200_OK)
 
-    
+    # getStudents.append(getUserClass.students.all()) 
