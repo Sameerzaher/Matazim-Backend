@@ -61,7 +61,7 @@ class UserProfileViewSet(viewsets.ModelViewSet):
             print("user from query is: ", user)
             arr=[]
             u = UserProfile.objects.get(user=user)
-            print("user mail is: ", u.email)
+            # print("user mail is: ", u.email)
             print("user name is: ", u.firstName)
             print("user surname is: ", u.lastName)
             # userDetails= User.objects.filter(user=user.id, course=pk)
@@ -78,7 +78,7 @@ class UserProfileViewSet(viewsets.ModelViewSet):
             print("user from query is: ",user)
             arr=[]
             u = UserProfile.objects.get(user=user)
-            print("user mail is: ", u.email)
+            # print("user mail is: ", u.email)
             print("user name is: ", u.firstName)
             print("user surname is: ", u.lastName)
             u.username=user
@@ -99,7 +99,21 @@ class UserCoursesViewSet(viewsets.ModelViewSet):
     serializer_class = UserCoursesSerializer 
     authentication_classes = (TokenAuthentication, )
 
-# get all the courses belongs to the user
+# get all the courses belongs to the user by the user Id
+    @action (detail=True, methods = ['GET'])
+    def getAllCoursesByUserId(self, request, pk=None):
+        # get the user by the pk
+        user = pk
+        arr=[]
+        userCourses= UserCourses.objects.filter(user=user)
+        for userCourse in userCourses:
+            serializers = UserCoursesSerializer(userCourse, many=False)
+            arr.append(serializers.data)
+            
+        response = {'message': 'Get', 'results': arr }
+        return Response (response, status=status.HTTP_200_OK)
+
+# get all the courses belongs to the user by the token
     @action (detail=True, methods = ['GET'])
     def getAllUserCourses(self, request, pk=None):
         # get the user by the authentication
@@ -334,6 +348,40 @@ class ClassViewSet(viewsets.ModelViewSet):
         response = {'message': 'Updated', 'results': serializers.data }
         return Response (response, status=status.HTTP_200_OK)
 
+#  remove user from class
+    @action (detail=True, methods = ['POST'])
+    def removeUserFromClass(self, request, pk=None):
+        # get the class by pk
+        getUserClass= Class.objects.get(id=pk)  
+
+        # trying to remove a student
+        if 'student' in request.data:   
+            # get the username by the data
+            username = request.data['student']
+            # get the user by the given username
+            user = UserProfile.objects.get(username=username)
+            getUserClass.students.remove(user)
+
+        # trying to remove a teacher
+        if 'teacher' in request.data:   
+            # get the username by the data
+            username = request.data['teacher']
+            # get the user by the given username
+            user = UserProfile.objects.get(username=username)
+            getUserClass.teachers.remove(user)
+
+         # trying to remove a coordinator
+        if 'coordinator' in request.data:   
+            # get the username by the data
+            username = request.data['coordinator']
+            # get the user by the given username
+            user = UserProfile.objects.get(username=username)
+            getUserClass.coordinators.remove(user)
+
+        getUserClass.save()
+        serializers = ClassSerializer(getUserClass, many=False)
+        response = {'message': 'Updated', 'results': serializers.data }
+        return Response (response, status=status.HTTP_200_OK)
     
        
                
