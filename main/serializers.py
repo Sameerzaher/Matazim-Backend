@@ -6,7 +6,8 @@ from .models import Course, Lesson, UserCourses, UserLessons, UserClasses ,UserP
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'password', 'email','firstName', 'lastName')
+        # fields = ('id', 'username', 'password', 'email','firstName', 'lastName')
+        fields = ('id', 'username', 'password')
         extra_kwargs = {'password': {'write_only': True, 'required': True}}
 
     def create(self, validated_data):
@@ -54,7 +55,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = UserProfile
-        fields = ('id', 'user','username', 'firstName', 'lastName', 'aboutMe', 'hobbies', 'badges', 'myGoal',
+        fields = ('id', 'user','username', 'firstName', 'lastName', 'aboutMe', 'hobbies', 'badges', 'myGoal','userType',
          'studentClasses','teacherClasses', 'coordinatorClasses' )
     
 
