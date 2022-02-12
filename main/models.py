@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
 
+TYPE_CHOICES = (("1", "student"),("2", "teacher"),("3", "coordinator"),("4", "admin"),)
+
 class UserProfile(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     username =  models.CharField(max_length=32)
@@ -12,6 +14,11 @@ class UserProfile(models.Model):
     hobbies = models.CharField(max_length=200)
     badges = models.IntegerField(validators=[MinValueValidator(0),MaxValueValidator(6)])
     myGoal = models.CharField(max_length=200)
+    userType = models.CharField(
+        max_length = 20,
+        choices = TYPE_CHOICES,
+        default = '1'
+    )
     # classes = models.ManyToManyField(Class)
 
     def __str__(self):
