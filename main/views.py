@@ -45,11 +45,20 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     @action (detail=True, methods = ['POST'])
     def createUserProfile(self, request, pk=None):
         print("inside create user profile")
-        username = request.data['username']
-     
-        getUser= User.objects.filter(username=username)       
-                          
-        newUser = UserProfile.objects.create(user=getUser[0], username=username, firstName=' ',lastName=' ',aboutMe= ' ', hobbies = ' ', badges=0, myGoal= '' )
+        # get the given username
+        username = request.data['username']  
+        # get the user from DB  by the given username
+        getUser= User.objects.filter(username=username) 
+        # get the values of first name and last name
+        givenFirstName = ' '
+        givenLastName = ' '
+        if 'firstName' in request.data:
+            givenFirstName = request.data['firstName']
+        if 'lastName' in request.data:
+            givenLastName = request.data['lastName']
+
+
+        newUser = UserProfile.objects.create(user=getUser[0], username=username, firstName=givenFirstName,lastName=givenLastName,aboutMe= ' ', hobbies = ' ', badges=0, myGoal= '' )
         newUser.save()
         print("user is: ", newUser)
            
@@ -259,7 +268,7 @@ class UserLessonsViewSet(viewsets.ModelViewSet):
     #     response = {'message': 'Get', 'results': arr }
     #     return Response (response, status=status.HTTP_200_OK)
 
- #  Get all the userLessons details belonged to the requsted user by the authentication
+ #  Get all the userLessons details belongs to the requsted user by the authentication
     @action (detail=True, methods = ['POST'])
     def getUserLessons(self, request, pk=None):
         # get the user by the authentication
@@ -278,6 +287,20 @@ class UserLessonsViewSet(viewsets.ModelViewSet):
         response = {'message': 'Get', 'results': arr }
         return Response (response, status=status.HTTP_200_OK)
 
+#  Get all the objects of UserLessons (include answers) belongs to the requsted user by his ID
+    @action (detail=True, methods = ['POST'])
+    def getUserAnswers(self, request, pk=None):
+        # get the requested user
+        if 'userId' in request.data:
+            userID = request.data['userId']
+        arr=[]
+        userlessons= UserLessons.objects.filter(user=userID)
+        for userlesson in userlessons:
+             serializers = UserLessonsSerializer(userlesson, many=False)
+             arr.append(serializers.data)
+            
+        response = {'message': 'Get', 'results': arr }
+        return Response (response, status=status.HTTP_200_OK)
 
 
     #  Update or create a userLessons 
