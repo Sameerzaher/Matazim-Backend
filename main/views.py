@@ -293,8 +293,9 @@ class UserLessonsViewSet(viewsets.ModelViewSet):
         # get the requested user
         if 'userId' in request.data:
             userID = request.data['userId']
+            lessonID = request.data['lessonId']
         arr=[]
-        userlessons= UserLessons.objects.filter(user=userID)
+        userlessons= UserLessons.objects.filter(user=userID, lesson=lessonID)
         for userlesson in userlessons:
              serializers = UserLessonsSerializer(userlesson, many=False)
              arr.append(serializers.data)
@@ -315,7 +316,6 @@ class UserLessonsViewSet(viewsets.ModelViewSet):
         try:
             # success if need to update 
             lesson = UserLessons.objects.get(id=getUserLessons[0].id)
-            print("printing: ",lesson.notes, lesson.answer)
             lesson.user = user
             # user trying to change the note
             if 'notes' in request.data:
@@ -324,8 +324,16 @@ class UserLessonsViewSet(viewsets.ModelViewSet):
              # user trying to change the answer
             if 'answer' in request.data:
                 answer = request.data['answer']
+                link = request.data['link']
+                image = request.data['image']
+                print(answer)
+                print(link)
+                print(image)
+                print(request.data['image'])
                 lesson.answer = answer
-            
+                lesson.link = link
+                lesson.image = image
+                
             lesson.save()
             print ("user is: ", user)
             serializers = UserLessonsSerializer(lesson, many=False)
@@ -342,10 +350,12 @@ class UserLessonsViewSet(viewsets.ModelViewSet):
             # user trying to create an answer
             if 'answer' in request.data:
                 answer = request.data['answer']
+                link = request.data['link']
+                image = request.data['image']
                 notes = ""
                
             lesson = Lesson.objects.get(id=pk)
-            lessonVar = UserLessons.objects.create(user=user,lesson=lesson, answer=answer, notes=notes )
+            lessonVar = UserLessons.objects.create(user=user,lesson=lesson, answer=answer,link=link, image=image, notes=notes )
             lessonVar.save()
             response = {'message': 'created', 'results': lessonVar }
             return Response (response, status=status.HTTP_200_OK)

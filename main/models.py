@@ -53,6 +53,8 @@ class UserLessons(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
     answer = models.CharField(max_length=300)
+    link = models.URLField(max_length=200, blank=True, null=True, default=None)
+    image = models.FileField(upload_to="answers/", blank=True)
     notes =  models.CharField(max_length=400)
     class meta:
         unique_together = (( 'lesson', 'user'),) 
