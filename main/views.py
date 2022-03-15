@@ -8,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from .models import Course, Lesson, UserCourses, UserLessons, UserProfile, Class
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -251,7 +252,9 @@ class UserCoursesViewSet(viewsets.ModelViewSet):
 
 class UserLessonsViewSet(viewsets.ModelViewSet):
     queryset = UserLessons.objects.all()
-    serializer_class = UserLessonsSerializer     
+    serializer_class = UserLessonsSerializer   
+    parser_classes = (MultiPartParser,FormParser, JSONParser) 
+    # parser_classes = (MultiPartParser, )   
     authentication_classes = (TokenAuthentication, )
      
     # #  Get all the userLessons details belonged to the requsted user by the authentication
@@ -306,7 +309,7 @@ class UserLessonsViewSet(viewsets.ModelViewSet):
 
     #  Update or create a userLessons 
     @action (detail=True, methods = ['POST'])
-    def addUserLessons(self, request, pk=None):
+    def addUserLessons(self, request, pk=None, format=None):
         # get the user by the authentication
         user = request.user
         # if getUserLessons get a value (len(getUserLessons) > 0) it means that 
@@ -315,21 +318,30 @@ class UserLessonsViewSet(viewsets.ModelViewSet):
                 
         try:
             # success if need to update 
+            # print("success 1")
             lesson = UserLessons.objects.get(id=getUserLessons[0].id)
+            # print("success 2")
             lesson.user = user
+            # print(request.data['notes'])
+            # print("success 3")
+            
             # user trying to change the note
             if 'notes' in request.data:
+                # print("needs to update notes")
                 notes = request.data['notes']
                 lesson.notes = notes
+            else:
+                print("notes is not in request data")
              # user trying to change the answer
             if 'answer' in request.data:
                 answer = request.data['answer']
                 link = request.data['link']
                 image = request.data['image']
+                # .parser_classes(MultiPartParser,)
                 print(answer)
                 print(link)
                 print(image)
-                print(request.data['image'])
+                # print(request.data['image'])
                 lesson.answer = answer
                 lesson.link = link
                 lesson.image = image
@@ -341,7 +353,7 @@ class UserLessonsViewSet(viewsets.ModelViewSet):
             return Response (response, status=status.HTTP_200_OK)
         except:
             # need to create
-            print("trying to create")
+            print("trying to create 2")
             print("pk ", pk)
             # user trying to create a note
             if 'notes' in request.data:
@@ -350,10 +362,14 @@ class UserLessonsViewSet(viewsets.ModelViewSet):
             # user trying to create an answer
             if 'answer' in request.data:
                 answer = request.data['answer']
+                print("i'm ok 1")
                 link = request.data['link']
+                print("i'm ok 2")
                 image = request.data['image']
+                # .parser_classes(MultiPartParser,)
+                print("i'm ok 3")
                 notes = ""
-               
+            print("i'm ok 4")   
             lesson = Lesson.objects.get(id=pk)
             lessonVar = UserLessons.objects.create(user=user,lesson=lesson, answer=answer,link=link, image=image, notes=notes )
             lessonVar.save()
