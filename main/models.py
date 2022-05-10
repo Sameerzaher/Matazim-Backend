@@ -49,10 +49,15 @@ class UserCourses(models.Model):
         unique_together = (('numOfLesson', 'course', 'user'),) 
         index_together = (('numOfLesson', 'course', 'user'),) 
 
+def upload_path(instance, filename):
+    return '/'.join(['answers', str(instance.user), filename])
+
 class UserLessons(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
     answer = models.CharField(max_length=300)
+    link = models.URLField(max_length=200, blank=True, null=True, default=None)
+    image = models.ImageField(blank=True, null=True, upload_to=upload_path )
     notes =  models.CharField(max_length=400)
     class meta:
         unique_together = (( 'lesson', 'user'),) 
