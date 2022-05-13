@@ -3,9 +3,9 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.authentication import TokenAuthentication 
 from django.contrib.auth.models import User 
-from .serializers import UserSerializer, CourseSerializer, LessonSerializer, UserCoursesSerializer, UserLessonsSerializer, UserProfileSerializer, ClassSerializer
+from .serializers import UserSerializer, CourseSerializer, LessonSerializer, UserCoursesSerializer, UserLessonsSerializer, UserProfileSerializer, ClassSerializer, SchoolSerializer, PlanSerializer, GroupSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from .models import Course, Lesson, UserCourses, UserLessons, UserProfile, Class
+from .models import Course, Lesson, UserCourses, UserLessons, UserProfile, Class, School , Plan, Group
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
@@ -320,16 +320,17 @@ class UserLessonsViewSet(viewsets.ModelViewSet):
             # success if need to update 
             # print("success 1")
             lesson = UserLessons.objects.get(id=getUserLessons[0].id)
-            # print("success 2")
+            print("success 2")
             lesson.user = user
             # print(request.data['notes'])
-            # print("success 3")
+            print("success 3")
             
             # user trying to change the note
             if 'notes' in request.data:
-                # print("needs to update notes")
-                notes = request.data['notes']
+                print("needs to upfate a note") 
+                notes = request.data['notes']             
                 lesson.notes = notes
+                print("the note is: ", notes)
             else:
                 print("notes is not in request data")
              # user trying to change the answer
@@ -338,6 +339,7 @@ class UserLessonsViewSet(viewsets.ModelViewSet):
                 link = request.data['link']
                 image = request.data['image']
                 # .parser_classes(MultiPartParser,)
+                print("needs to update the answer!")
                 print(answer)
                 print(link)
                 print(image)
@@ -376,10 +378,19 @@ class UserLessonsViewSet(viewsets.ModelViewSet):
             response = {'message': 'created', 'results': lessonVar }
             return Response (response, status=status.HTTP_200_OK)
 
+class SchoolViewSet(viewsets.ModelViewSet):
+    queryset = School.objects.all()
+    serializer_class = SchoolSerializer 
+
+class PlanViewSet(viewsets.ModelViewSet):
+    queryset = Plan.objects.all()
+    serializer_class = PlanSerializer
+
 class ClassViewSet(viewsets.ModelViewSet):
     queryset = Class.objects.all()
     serializer_class = ClassSerializer 
-
+    parser_classes = (MultiPartParser,FormParser, JSONParser)
+    authentication_classes = (TokenAuthentication, )
     # get all the students of a class
     @action (detail=True, methods = ['POST'])
     def getClassStudents(self, request, pk=None):
@@ -399,6 +410,19 @@ class ClassViewSet(viewsets.ModelViewSet):
      
         arr=[]
         userProfile= UserProfile.objects.filter(teacherClasses=pk)
+        for userProfile in userProfile:
+             serializers = UserProfileSerializer(userProfile, many=False)
+             arr.append(serializers.data)
+            
+        response = {'message': 'Get', 'results': arr }
+        return Response (response, status=status.HTTP_200_OK)
+
+    # get all the matatzes of a class
+    @action (detail=True, methods = ['POST'])
+    def getClassMatatzes(self, request, pk=None):
+     
+        arr=[]
+        userProfile= UserProfile.objects.filter(matatzClasses=pk)
         for userProfile in userProfile:
              serializers = UserProfileSerializer(userProfile, many=False)
              arr.append(serializers.data)
@@ -432,6 +456,14 @@ class ClassViewSet(viewsets.ModelViewSet):
             # get the user by the given username
             user = UserProfile.objects.get(username=username)
             getUserClass.students.add(user)
+
+        # trying to add a matatz
+        if 'matatz' in request.data:   
+            # get the username by the data
+            username = request.data['matatz']
+            # get the user by the given username
+            user = UserProfile.objects.get(username=username)
+            getUserClass.matatzes.add(user)
 
         # trying to add a teacher
         if 'teacher' in request.data:   
@@ -468,6 +500,14 @@ class ClassViewSet(viewsets.ModelViewSet):
             user = UserProfile.objects.get(username=username)
             getUserClass.students.remove(user)
 
+        # trying to remove a matatz
+        if 'matatz' in request.data:   
+            # get the username by the data
+            username = request.data['matatz']
+            # get the user by the given username
+            user = UserProfile.objects.get(username=username)
+            getUserClass.matatzes.remove(user)
+
         # trying to remove a teacher
         if 'teacher' in request.data:   
             # get the username by the data
@@ -489,31 +529,39 @@ class ClassViewSet(viewsets.ModelViewSet):
         response = {'message': 'Updated', 'results': serializers.data }
         return Response (response, status=status.HTTP_200_OK)
     
+    @action (detail=True, methods = ['POST'])
+    def addClass(self, request, pk=None):
+        # get the user by the authentication
+        user = request.user
+        # get the Class name by the data
+        className = request.data['className']
+        # create a new class with the given name
+        newClass = Class.objects.create(className=className)
+        newClass.save()
+        # find the userProfile Object of the auth and assign it as a teacher for the new class
+        teacher = UserProfile.objects.get(user=user)
+        newClass.teachers.add(teacher)
+        newClass.save()
+        response = {'message': 'Updated', 'results': newClass }
+        return Response (response, status=status.HTTP_200_OK)   
+
+class GroupViewSet(viewsets.ModelViewSet):
+    queryset = Class.objects.all()
+    serializer_class = GroupSerializer 
+    parser_classes = (MultiPartParser,FormParser, JSONParser)
+    authentication_classes = (TokenAuthentication, )            
        
-               
-       
+    # get matatz of a student by the group table
+    @action (detail=True, methods = ['POST'])
+    def getStudentsMatatz(self, request, pk=None):
+        # find the group that the given user belongs to
+        group= Group.objects.filter(students=pk)
+        # extract the matatz username from the group
+        matatz = group[0].user
+        #get the matatzProfie object and send it as response
+        matatzProfile= UserProfile.objects.get(username=matatz)
+        serializers = UserProfileSerializer(matatzProfile, many=False)       
+        response = {'message': 'Get', 'results': serializers.data }
+        return Response (response, status=status.HTTP_200_OK)
 
-    # class UserProfileViewSet(viewsets.ModelViewSet):
-    #     queryset = UserProfile.objects.all()
-    #     serializer_class = UserProfileSerializer 
-        # authentication_classes = (TokenAuthentication, )
-
-    # @action (detail=True, methods = ['POST'])
-    # def getUserDetails(self, request, pk=None):
-    #         print("im here in get user details")
-    #         user = request.user
-    #         print("user from query is: ", user)
-    #         arr=[]
-    #         u = User.objects.get(username='yarinAAA')
-    #         print("user mail is: ", u.email)
-    #         print("user name is: ", u.name)
-    #         print("user surname is: ", u.lastName)
-    #         userDetails= User.objects.filter(user=user.id, course=pk)
-    #         for userCourse in userCourses:
-    #             serializers = UserCoursesSerializer(userCourse, many=False)
-    #             arr.append(serializers.data)
-                
-    #         response = {'message': 'Get', 'results': arr }
-    #         return Response (response, status=status.HTTP_200_OK)
-
-    # getStudents.append(getUserClass.students.all()) 
+ 
